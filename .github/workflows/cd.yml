@@ -45,14 +45,23 @@ jobs:
 
       - name: Update image tag
         run: |
-          chart_dir="chart"
-          new_image_tag=${{ github.sha }}
-          sed -i "s/^  tag: .*/  tag: $new_image_tag/" "$chart_dir/values.yaml"
+          CHART_DIR="chart"
+          VALUES_FILE="${CHART_DIR}/values.yaml"
+          NEW_IMAGE_TAG=${{ github.sha }}
+
+          echo "Updating image tag in $VALUES_FILE to $NEW_IMAGE_TAG"
+
+          sed -i "s/^  tag: .*/  tag: ${NEW_IMAGE_TAG}/" "$VALUES_FILE"
+          grep 'tag:' "$VALUES_FILE"
 
       - name: Commit and push changes
         run: |
+          CHART_DIR="chart"
+          VALUES_FILE="${CHART_DIR}/values.yaml"
+
           git config --global user.name "abdullah-hamada7"
           git config --global user.email "abdullah-hamada7@gmail.com"
-          git add "$chart_dir/values.yaml"
-          git commit -m "updating image tag" || echo "No changes to commit"
+
+          git add "$VALUES_FILE"
+          git commit -m "updating image tag to ${{ github.sha }}" || echo "No changes to commit"
           git push
